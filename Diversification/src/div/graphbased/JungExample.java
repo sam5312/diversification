@@ -1,6 +1,7 @@
 package div.graphbased;
 
 import java.awt.Dimension;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,31 +23,46 @@ import edu.uci.ics.jung.visualization.BasicVisualizationServer;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
+import utils.FileUtil;
 
 public class JungExample
 {
 
 	public static void main( String[] args )
 	{
-		String t1 = "travel gear checklist #travelblogger #fashionblogger #travel #fashionblogger #blogger";
-		String t2 = "wake early beat crowds #travel #earlybird ";// "sameendra colombo";
-		String t3 = "highest-rated travel products amazon #travel #products gear";
+//		String t1 = "travel gear checklist #travelblogger #fashionblogger #travel #fashionblogger #blogger";
+//		String t2 = "wake early beat crowds #travel #earlybird ";
+//		String t3 = "highest-rated travel products amazon #travel #products gear";
+//		String t4 = "sameendra colombo travel";
+//		String t5 = "colombo travel";
+//
+//		List<String> l = new ArrayList<>();
+//		l.add( t1 );
+//		l.add( t2 );
+//		l.add( t3 );
+//		l.add( t4 );
+//		l.add( t5 );
+//
+		List<String> orig_lines = FileUtil.readLines( new File("/media/fatcat/sameendra/twitter_personalization/tagbasedeval10nov/userwise3/PlanYourSafaris/#travel/toindex_tm/toindextweets.txt") );
+		List<String> cleaned_lines = new ArrayList<String>();
+		for(String line : orig_lines)
+		{
+			String[] splits = line.split( "\\s+",3 );
+			String cleaned_line = splits[2];
+			cleaned_lines.add( cleaned_line );
+		}
 		
-
-		List<String> l = new ArrayList<>();
-		l.add( t1 );
-		l.add( t2 );
-		l.add( t3 );
-
-		// TODO Auto-generated method stub
-		// start();
-		createCoocuGraph( l );
+		
+//		
+//		// TODO Auto-generated method stub
+//		// start();
+		createCoocuGraph( cleaned_lines );
 	}
 
-	private static void createCoocuGraph( List<String> l )
+	private static void createCoocuGraph( List<String> lines )
 	{
 		ResultSet1 rs1 = new ResultSet1();
-		for ( String t : l )
+		for ( String t : lines )
 		{
 			String[] splits = t.split( " " );
 			rs1.updateHashtagToHashtagMap( new ArrayList<String>( new HashSet<String>( Arrays.asList( splits ) ) ) );
