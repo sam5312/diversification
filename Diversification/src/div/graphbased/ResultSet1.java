@@ -78,9 +78,12 @@ public class ResultSet1 {
 					dest = new RapidVertex(edgeInfo.getKey());
 					verticesMap.put(edgeInfo.getKey(), dest);
 				}
+				if ( edgeInfo.getValue() > JungExample.coocc_count) //only words with more than 3 co occurence
+				{
 				RapidEdge edge = new RapidEdge("", source, dest);
 				edge.setWeight(edgeInfo.getValue());
 				graph.addEdge(edge, source, dest);
+				}
 			}
 		}
 		return graph;
@@ -139,7 +142,7 @@ class RapidEdge {
  class RapidVertex {
 
 	private String name;
-	String label;
+	private String label;
 	public int state; //1 == core, 2==boarder
 	public Set<String> clusterIDs = new HashSet<String>();
 
