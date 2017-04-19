@@ -43,7 +43,7 @@ public class JungExample
 //		l.add( t4 );
 //		l.add( t5 );
 //
-		List<String> orig_lines = FileUtil.readLines( new File("/media/fatcat/sameendra/twitter_personalization/tagbasedeval10nov/userwise3/PlanYourSafaris/#travel/toindex_tm/toindextweets.txt") );
+		List<String> orig_lines = FileUtil.readLines( new File("toindextweets.txt") );
 		List<String> cleaned_lines = new ArrayList<String>();
 		for(String line : orig_lines)
 		{
@@ -94,7 +94,7 @@ public class JungExample
 	private static void createGraph( ResultSet1 rs1 )
 	{
 		UndirectedGraph<RapidVertex,RapidEdge> g = rs1.generateWordWinClusters();
-		System.out.println( "The graph g = " + g.toString() );
+//		System.out.println( "The graph g = " + g.toString() );
 		
 		Layout<RapidVertex, RapidEdge> layout = new CircleLayout( g );
 		layout.setSize( new Dimension( 500, 500 ) ); // sets the initial size of the space
