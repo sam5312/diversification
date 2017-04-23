@@ -346,7 +346,7 @@ public class CooccuranceGraph
 //
 //		// PrimMinimumSpanningTree<String, MyEdge> prim = new PrimMinimumSpanningTree<>( UndirectedSparseGraph.<String,MyEdge>getFactory() );
 //		// Graph<String, MyEdge> MST = prim.transform( g );
-//		 System.out.println( MST.toString() );
+//		// System.out.println( MST.toString() );
 //		//
 //		// Note that we can use the same nodes and edges in two different graphs.
 //		// Graph<Integer, String> g2 = new SparseMultigraph<Integer, String>();
