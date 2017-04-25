@@ -37,7 +37,7 @@ public class CooccuranceGraph
 
 	public static final int coocc_count = 3;
 	
-	public static final int mst_min_degree = 2;
+	public static final int mst_min_degree = 3;
 
 	public static String removeTargetWords( String input, String target )
 	{
@@ -144,15 +144,16 @@ public class CooccuranceGraph
 	/**
 	 * prints the subgraphs of the given graph and returns the maximum subgraph. uses the weakcomponentclusterer for finding subgraphs.
 	 * @param g
+	 * @param subgraphsRemvMaxsubgraph 
 	 * @return 
 	 */
-	public static Graph<RapidVertex, RapidEdge> printSubGraphs(Graph<RapidVertex,RapidEdge> g)
+	public static Graph<RapidVertex, RapidEdge> printSubGraphs(Graph<RapidVertex,RapidEdge> g, Set<Set<RapidVertex>> subgraphsRemvMaxsubgraph)
 	{
 //		EdgeBetweennessClusterer<RapidVertex, RapidEdge> clusterer = new EdgeBetweennessClusterer<RapidVertex, RapidEdge>( 5 );
 		WeakComponentClusterer<RapidVertex, RapidEdge> clusterer = new WeakComponentClusterer<>();
 		int i = 0;
 		Set<Set<RapidVertex>> transform = clusterer.transform( g );
-		List<Set<RapidVertex>> listOfSets = new ArrayList<>();
+		subgraphsRemvMaxsubgraph.addAll( transform ); //add all sets of vertices first
 	
 		int maxClusterSize  = -1;
 		Set<RapidVertex> maxClust = null; //contains the largest cluster
@@ -164,7 +165,6 @@ public class CooccuranceGraph
 				maxClust = vSet;
 				maxClusterSize = vSet.size();
 			}
-				
 	
 			System.out.println( "CLUSTER_" + i + ", " + vSet.size() );
 			for ( RapidVertex rapidVertex : vSet )
@@ -175,8 +175,27 @@ public class CooccuranceGraph
 			i++;
 		}
 		
+		subgraphsRemvMaxsubgraph.remove( maxClust );//remove the max subgraph
+
+		
 		Graph<RapidVertex, RapidEdge> maxSubGraph = FilterUtils.createInducedSubgraph( maxClust, g );
 		return maxSubGraph;
+	}
+	
+	/**
+	 * returns the subgraphs of a given graph
+	 * @param g
+	 * @param subgraphsRemvMaxsubgraph 
+	 * @return 
+	 */
+	public static Set<Set<RapidVertex>> getWeakComponents(Graph<RapidVertex,RapidEdge> g)
+	{
+//		EdgeBetweennessClusterer<RapidVertex, RapidEdge> clusterer = new EdgeBetweennessClusterer<RapidVertex, RapidEdge>( 5 );
+		WeakComponentClusterer<RapidVertex, RapidEdge> clusterer = new WeakComponentClusterer<>();
+		int i = 0;
+		Set<Set<RapidVertex>> transform = clusterer.transform( g );
+	
+		return transform;
 	}
 	
 	/**

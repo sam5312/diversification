@@ -2,7 +2,10 @@ package div.graphbased;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedGraph;
@@ -27,9 +30,16 @@ public class Main
 		// l.add( t4 );
 		// l.add( t5 );
 
-		String query = "#travel";
+//		String query = "#travel";
+		String query = "#android";
 
-		List<String> orig_lines = FileUtil.readLines( new File( "/media/fatcat/sameendra/twitter_personalization/tagbasedeval10nov/userwise3/PlanYourSafaris/#travel/toindex_tm/toindextweets.txt" ) );
+//		List<String> orig_lines = FileUtil.readLines( new File( "/media/fatcat/sameendra/twitter_personalization/"
+//				+ "tagbasedeval10nov/userwise3/PlanYourSafaris/#travel/toindex_tm/toindextweets.txt" ) );
+		
+		List<String> orig_lines = FileUtil.readLines( new File( "/media/fatcat/sameendra/twitter_personalization/"
+				+ "tagbasedeval10nov/userwise3/AndroidDev/#android/toindex_tm/toindextweets.txt" ) );
+		
+		
 		List<String> cleaned_lines = new ArrayList<String>();
 		for ( String line : orig_lines )
 		{
@@ -42,14 +52,33 @@ public class Main
 			cleaned_lines.add( qryTermRemv );
 		}
 
-		 //
 		 // // TODO Auto-generated method stub
 		 // // start();
 		 ResultSet1 rs1 = CooccuranceGraph.getCoOccStatistics( cleaned_lines );
 		 UndirectedGraph<RapidVertex, RapidEdge> graph = CooccuranceGraph.createGraph( rs1 );
 		 CooccuranceGraph.visualizeGraph( graph , "orig graph" );
-		 Graph<RapidVertex, RapidEdge> maxSG = CooccuranceGraph.printSubGraphs( graph );
-		 Graph<RapidVertex, RapidEdge> mst = CooccuranceGraph.getMaxSpanningTree( maxSG );
+		 
+		 Set<Set<RapidVertex>> subgraphsRemvMaxsubgraph = new HashSet<Set<RapidVertex>>(); //contains subgraphs but the maxsubgraph is removed
+		 Graph<RapidVertex, RapidEdge> maxSG = CooccuranceGraph.printSubGraphs( graph, subgraphsRemvMaxsubgraph ); //get the maximum subgraph
+		 Graph<RapidVertex, RapidEdge> mst = CooccuranceGraph.getMaxSpanningTree( maxSG ); //find the MSTs for the maximum subgraph
+
+		 Set<Set<RapidVertex>> weakComponents = CooccuranceGraph.getWeakComponents( mst );
+		 weakComponents.addAll( subgraphsRemvMaxsubgraph );
+
+		 int i = 0;
+		 for ( Set<RapidVertex> vSet : weakComponents )
+			{  
+				 
+		
+				System.out.println( "CLUSTER_" + i + ", " + vSet.size() );
+				for ( RapidVertex rapidVertex : vSet )
+				{
+					System.out.print( rapidVertex.getName() + ", " );
+				}
+				System.out.println();
+				i++;
+			}
+		 
 		 
 		 CooccuranceGraph.visualizeGraph( mst , "MST");
 		
