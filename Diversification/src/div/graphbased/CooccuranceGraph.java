@@ -35,9 +35,9 @@ import utils.FileUtil;
 public class CooccuranceGraph
 {
 
-	public static final int coocc_count = 3;
+	public static final int coocc_count = 1; //minimum co occurence count when building the co occurence graph
 	
-	public static final int mst_min_degree = 3;
+	public static final int mst_min_degree = 2;
 
 	public static String removeTargetWords( String input, String target )
 	{
@@ -94,8 +94,8 @@ public class CooccuranceGraph
 		UndirectedGraph<RapidVertex, RapidEdge> g = rs1.generateWordWinClusters();
 
 //		System.out.println( "The graph g = " + g.toString() );
-		System.out.println( "No vertices = " + g.getVertexCount() );
-		System.out.println( "No edges = " + g.getEdgeCount() );
+//		System.out.println( "No vertices = " + g.getVertexCount() );
+//		System.out.println( "No edges = " + g.getEdgeCount() );
 
 		Collection<RapidVertex> vertices = g.getVertices();
 		List<RapidVertex> verticesToRemv = new ArrayList<>();
@@ -166,12 +166,12 @@ public class CooccuranceGraph
 				maxClusterSize = vSet.size();
 			}
 	
-			System.out.println( "CLUSTER_" + i + ", " + vSet.size() );
-			for ( RapidVertex rapidVertex : vSet )
-			{
-				System.out.print( rapidVertex.getName() + ", " );
-			}
-			System.out.println();
+//			System.out.println( "CLUSTER_" + i + ", " + vSet.size() );
+//			for ( RapidVertex rapidVertex : vSet )
+//			{
+//				System.out.print( rapidVertex.getName() + ", " );
+//			}
+//			System.out.println();
 			i++;
 		}
 		
@@ -219,8 +219,8 @@ public class CooccuranceGraph
 		Graph<RapidVertex, RapidEdge> MST = prim.transform( g );
 	
 //		System.out.println( "MST" + MST.toString() );
-		System.out.println( "MST, No vertices = " + MST.getVertexCount() );
-		System.out.println( "MST, No edges = " + MST.getEdgeCount() );
+//		System.out.println( "MST, No vertices = " + MST.getVertexCount() );
+//		System.out.println( "MST, No edges = " + MST.getEdgeCount() );
 	
 		
 		Set<RapidEdge> mstEdgesSet = new HashSet<RapidEdge>(MST.getEdges());

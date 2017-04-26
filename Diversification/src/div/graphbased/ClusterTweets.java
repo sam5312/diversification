@@ -11,16 +11,19 @@ import java.util.Set;
 public class ClusterTweets
 {
 
-	public static void start( Set<Set<RapidVertex>> weakComponents, List<String> orig_lines )
+	public static Map<Integer, List<Tweet>> assignTweetsToClusters( Set<Set<RapidVertex>> weakComponents, List<String> orig_lines )
 	{
-		System.out.println( "total no of clusters = " + weakComponents.size() );
+//		System.out.println( "total no of clusters = " + weakComponents.size() );
 
-		Map<Integer, List<String>> tweetClustersMap = new HashMap<Integer, List<String>>();
+		Map<Integer, List<Tweet>> tweetClustersMap = new HashMap<Integer, List<Tweet>>();
 
 		for ( String tweet : orig_lines ) // for each tweet
 		{
 			String[] splits = tweet.split( "\\s+", 3 ); // other_00111 x wake early beat crowds #travel #earlybird
 			String cleaned_line = splits[2]; // wake early beat crowds #travel #earlybird
+			
+			Tweet t = new Tweet( splits[0], cleaned_line );
+			
 			Map<String, Integer> tweetMap = getTermFrequencyMapForDoc( cleaned_line.split( " " ) );
 			
 			double maxScore = -1;
@@ -31,7 +34,7 @@ public class ClusterTweets
 			{
 				Map<String, Integer> graphCompMap = getTermFrequencyMapForAGraphComp( vSet );
 
-				double simScore = calcSim( tweetMap, graphCompMap );
+				double simScore = cosineSim( tweetMap, graphCompMap );
 				if ( simScore != 0)
 				{
 					if ( simScore > maxScore)
@@ -47,34 +50,28 @@ public class ClusterTweets
 				i++;
 			}
 			
-			addThisTweetToACluster(tweet,clusterId,tweetClustersMap);
+			addThisTweetToACluster(t,clusterId,tweetClustersMap);
 		}
 		
-		Set<Entry<Integer,List<String>>> entrySet = tweetClustersMap.entrySet();
-		for ( Entry<Integer, List<String>> entry : entrySet )
-		{
-			Integer clusterId = entry.getKey();
-			List<String> tweets = entry.getValue();
-			System.out.println( clusterId + ", " + tweets.size() );
-		}
+		return tweetClustersMap;
 	}
 
-	private static void addThisTweetToACluster( String tweet, int clusterId, Map<Integer, List<String>> tweetClustersMap )
+	private static void addThisTweetToACluster( Tweet t, int clusterId, Map<Integer, List<Tweet>> tweetClustersMap )
 	{
 		if ( tweetClustersMap.get( clusterId ) == null)
 		{
-			List<String> l = new LinkedList<>();
-			l.add( tweet );
+			List<Tweet> l = new LinkedList<>();
+			l.add( t );
 			tweetClustersMap.put( clusterId, l );
 		} else
 		{
-			List<String> tweetsList = tweetClustersMap.get( clusterId );
-			tweetsList.add( tweet );
+			List<Tweet> tweetsList = tweetClustersMap.get( clusterId );
+			tweetsList.add( t );
 			tweetClustersMap.put( clusterId, tweetsList );
 		}
 	}
 
-	public static Map<String, Integer> getTermFrequencyMapForDoc( String[] terms )
+	private static Map<String, Integer> getTermFrequencyMapForDoc( String[] terms )
 	{
 		Map<String, Integer> termFrequencyMap = new HashMap<>();
 		for ( String term : terms )
@@ -86,7 +83,7 @@ public class ClusterTweets
 		return termFrequencyMap;
 	}
 
-	public static Map<String, Integer> getTermFrequencyMapForAGraphComp( Set<RapidVertex> vSet )
+	private static Map<String, Integer> getTermFrequencyMapForAGraphComp( Set<RapidVertex> vSet )
 	{
 		Map<String, Integer> termFrequencyMap = new HashMap<>();
 		for ( RapidVertex rapidVertex : vSet )
@@ -98,7 +95,7 @@ public class ClusterTweets
 		return termFrequencyMap;
 	}
 
-	public static double calcSim( Map<String, Integer> a, Map<String, Integer> b )
+	public static double cosineSim( Map<String, Integer> a, Map<String, Integer> b )
 	{
 		// Get unique words from both sequences
 		HashSet<String> intersection = new HashSet<>( a.keySet() );
@@ -126,6 +123,35 @@ public class ClusterTweets
 
 		// return cosine similarity
 		return dotProduct / Math.sqrt( magnitudeA * magnitudeB );
+	}
+
+}
+
+class Tweet
+{
+	String tweetTxt;
+	String tweetId;
+	
+	public Tweet(String id, String txt)
+	{
+		this.tweetId = id;
+		this.tweetTxt = txt;
+	}
+	public String getTweetTxt()
+	{
+		return tweetTxt;
+	}
+	public void setTweetTxt( String tweetTxt )
+	{
+		this.tweetTxt = tweetTxt;
+	}
+	public String getTweetId()
+	{
+		return tweetId;
+	}
+	public void setTweetId( String tweetId )
+	{
+		this.tweetId = tweetId;
 	}
 
 }
