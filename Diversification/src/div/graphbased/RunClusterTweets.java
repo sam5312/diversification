@@ -42,17 +42,26 @@ public class RunClusterTweets
 //				+ "tagbasedeval10nov/userwise3/AndroidDev/#android/toindex_tm/toindextweets.txt" ) );
 //		
 		
-		start(query, orig_lines);
+		start(query, orig_lines, "PlanYourSafaris");
 
 	}
 	
-	public static Map<Integer, List<Tweet>> start(String query, List<String> orig_lines)
+	public static Map<Integer, List<Tweet>> start(String query, List<String> orig_lines, String userName)
 	{
 		List<String> cleaned_lines = new ArrayList<String>();
+		
 		for ( String line : orig_lines )
 		{
-			String[] splits = line.split( "\\s+", 3 ); // other_00111 x wake early beat crowds #travel #earlybird
-			String cleaned_line = splits[2]; // wake early beat crowds #travel #earlybird
+			String cleaned_line = null;
+			if (line.startsWith( "other_") || line.startsWith( userName +"_")) //to determined if the input file is an output from gensim
+			{
+				String[] splits = line.split( "\\s+", 3 ); // other_00111 x wake early beat crowds #travel #earlybird
+				cleaned_line = splits[2]; // wake early beat crowds #travel #earlybird
+			}
+			else //no need to clean here, line contains the tweet text only.
+			{
+				cleaned_line = line;
+			}
 
 			String qryTermRemv = CooccuranceGraph.removeTargetWords( cleaned_line, query );
 

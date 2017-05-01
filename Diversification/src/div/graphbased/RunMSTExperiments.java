@@ -4,12 +4,15 @@
 package div.graphbased;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+
 
 import utils.FileUtil;
 
@@ -18,21 +21,24 @@ import utils.FileUtil;
  */
 public class RunMSTExperiments
 {
-	public static final String rootdir = "/media/fatcat/sameendra/twitter_personalization/tagbasedeval10nov/userwise3/";
+//	public static final String rootdir = "/media/fatcat/sameendra/twitter_personalization/tagbasedeval10nov/userwise3/";
+	public static final String rootdir = "/media/fatcat/sameendra/twitter_personalization/tagbasedeval10nov/userwise4_50per/";
 
 	private  static int pk1 = 20; //20; //precision at k1
 	private  static int pk2 = 50; // 50; 
 	
+	private final static int  TIMES_USERS_TWEETS = 100;
+
 	/**
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main( String[] args )
+	public static void main( String[] args ) throws IOException
 	{
 		start();
-
 	}
 
-	private static void start()
+	private static void start() throws IOException
 	{
 		File[] folders = new File( rootdir ).listFiles();
 
@@ -49,7 +55,7 @@ public class RunMSTExperiments
 			float noOfQuries = querytermsfolders.length;
 
 			System.out.println( userDir.getPath() ); // print the name of the list pair
-			// if (userDir.getName().equals( "PlanYourSafaris" ))
+
 			for ( File qryDir : querytermsfolders ) // for each query "#beauty", "#fashion" etc
 			{
 				String query = qryDir.getName().trim();
@@ -59,8 +65,34 @@ public class RunMSTExperiments
 				List<String> userTweets = FileUtil.readLines( new File(qryDir.getPath() + "/userprofiles/" + userName + "_bottom_diff.dat")) ;
 				Map<String, Integer> tfMapUser = getTermFrequencyMapForUser( userTweets );
 
-				List<String> linesToindex = FileUtil.readLines( new File(qryDir.getPath() + "/toindex_tm/toindextweets.txt" )) ;
-				Map<Integer, List<Tweet>> clusteredTweetsToindex = RunClusterTweets.start( query, linesToindex );
+//				List<String> linesToindex = FileUtil.readLines( new File(qryDir.getPath() + "/toindex_tm/toindextweets.txt" )) ;
+				
+				//when not using the output from gensim where each tweet is a single file
+				List<String> linesToindex = new ArrayList<>();
+
+				File toindexDir = new File(qryDir.getPath() + "/toindex/");
+				List<File> tweetsOftheSameUser = getTweetsOftheSameUser( toindexDir.toPath(), userName );
+				int noOfTweetsFromTheSameUsr = tweetsOftheSameUser.size();
+
+				
+				for ( File doc : tweetsOftheSameUser )
+				{
+					List<String> lines = FileUtil.readLines( doc );
+					String tweet = lines.get( 0 ); 
+					linesToindex.add( doc.getName()	+"\tx\t"+ tweet );
+				}
+				
+				List<File> otherTweets = getOtherTweets( toindexDir.toPath(), TIMES_USERS_TWEETS*noOfTweetsFromTheSameUsr - noOfTweetsFromTheSameUsr );
+				
+				for ( File doc : otherTweets )
+				{
+					List<String> lines = FileUtil.readLines( doc );
+					String tweet = lines.get( 0 ); 
+					linesToindex.add( doc.getName()	+"\tx\t"+tweet );
+				}
+				
+				System.out.println( "total docs in the index = " + linesToindex.size() );
+				Map<Integer, List<Tweet>> clusteredTweetsToindex = RunClusterTweets.start( query, linesToindex, userName );
 				
 				double maxScore = -1;
 				int userAssignCluster = -1;
@@ -85,7 +117,6 @@ public class RunMSTExperiments
 					{
 						System.out.println( "user-cluster cosine score is zero" );
 					}
-					
 				}
 				
 				//tweets from cluster which is most sim tweets to user
@@ -124,6 +155,55 @@ public class RunMSTExperiments
 
 		}
 
+	}
+	
+	private static List<File> getTweetsOftheSameUser(Path path, String userName) throws IOException
+	{
+		List<File> tweetsSameUser = new ArrayList<File>();
+		
+		if ( Files.isDirectory( path ) )
+		{
+			File dir = path.toFile();
+			
+			for ( File file : dir.listFiles() )
+			{
+				if(file.getName().contains( userName))
+				{
+					tweetsSameUser.add( file );
+				}
+			}
+		}
+		return tweetsSameUser;
+	}
+	
+	private static List<File> getOtherTweets( Path path, final int otherTweetsToIndex ) throws IOException
+	{
+		List<File> othertweets = new ArrayList<File>();
+
+		if ( Files.isDirectory( path ) )
+		{
+			File dir = path.toFile();
+			int count = 0;
+
+			for ( File tweet : dir.listFiles() )
+			{
+				// only index non user's tweets (other_xxx.txt)
+				if ( tweet.getName().startsWith( "other_" ) )
+				{
+
+					if ( count < otherTweetsToIndex )
+					{
+						othertweets.add( tweet );
+						count++;
+					}
+					else // break if the desired no of tweets hv been indexed
+					{
+						break;
+					}
+				}
+			}
+		}
+		return othertweets;
 	}
 	
 	private static float calcRR( String qryClass, List<Tweet> tweetsFromUserAssignedCluster )

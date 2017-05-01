@@ -1,5 +1,6 @@
 package div.graphbased;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,7 +14,7 @@ public class ClusterTweets
 
 	public static Map<Integer, List<Tweet>> assignTweetsToClusters( Set<Set<RapidVertex>> weakComponents, List<String> orig_lines )
 	{
-//		System.out.println( "total no of clusters = " + weakComponents.size() );
+		System.out.println( "total no of clusters = " + weakComponents.size() );
 
 		Map<Integer, List<Tweet>> tweetClustersMap = new HashMap<Integer, List<Tweet>>();
 
@@ -23,8 +24,7 @@ public class ClusterTweets
 			String cleaned_line = splits[2]; // wake early beat crowds #travel #earlybird
 			
 			Tweet t = new Tweet( splits[0], cleaned_line );
-			
-			Map<String, Integer> tweetMap = getTermFrequencyMapForDoc( cleaned_line.split( " " ) );
+//			Map<String, Integer> tweetMap = getTermFrequencyMapForDoc( cleaned_line.split( " " ) );
 			
 			double maxScore = -1;
 			int clusterId = -1;
@@ -32,9 +32,12 @@ public class ClusterTweets
 			int i = 0;
 			for ( Set<RapidVertex> vSet : weakComponents ) // for each graph component
 			{
-				Map<String, Integer> graphCompMap = getTermFrequencyMapForAGraphComp( vSet );
-
-				double simScore = cosineSim( tweetMap, graphCompMap );
+				//similarity using cosine
+//				Map<String, Integer> graphCompMap = getTermFrequencyMapForAGraphComp( vSet );
+//				double simScore = cosineSim( tweetMap, graphCompMap );
+				
+				//similarity based on the intersection of words in the tweet and the words in the cluster(vSet)
+				double simScore = tweetAndClusterIntersec( cleaned_line.split( " " ), vSet );
 				if ( simScore != 0)
 				{
 					if ( simScore > maxScore)
@@ -56,6 +59,20 @@ public class ClusterTweets
 		return tweetClustersMap;
 	}
 
+	private static int tweetAndClusterIntersec(String[] terms, Set<RapidVertex> vSet)
+	{
+		Set<String> senseCluster = new HashSet<>();
+		for ( RapidVertex vertex : vSet )
+		{
+			senseCluster.add( vertex.getName() );
+		}
+		
+		senseCluster.retainAll( new HashSet<String>(Arrays.asList( terms )) );
+		
+		return senseCluster.size();
+		
+	}
+	
 	private static void addThisTweetToACluster( Tweet t, int clusterId, Map<Integer, List<Tweet>> tweetClustersMap )
 	{
 		if ( tweetClustersMap.get( clusterId ) == null)
