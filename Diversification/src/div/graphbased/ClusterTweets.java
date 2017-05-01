@@ -170,5 +170,4 @@ class Tweet
 	{
 		this.tweetId = tweetId;
 	}
-
 }
